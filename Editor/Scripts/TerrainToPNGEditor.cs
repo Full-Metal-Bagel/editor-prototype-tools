@@ -13,11 +13,11 @@ public class TerrainToPNGEditor : EditorWindow
     [SerializeField]
     private Texture2D _previewTexture;
 
-    [MenuItem("Tools/FMB Toolset/TerrainToPNG")]
+    [MenuItem("Tools/FMB Toolset/Terrain To PNG")]
     private static void Init()
     {
         TerrainToPNGEditor window = GetWindow<TerrainToPNGEditor>();
-        window.titleContent = new GUIContent("TerrainToPNG");
+        window.titleContent = new GUIContent("Terrain To PNG");
         window.Show();
     }
 
