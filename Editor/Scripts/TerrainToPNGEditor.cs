@@ -13,12 +13,31 @@ public class TerrainToPNGEditor : EditorWindow
     [SerializeField]
     private Texture2D _previewTexture;
 
-    [MenuItem("Tools/TerrainToPNG")]
-    static void Init()
+    [MenuItem("Tools/FMB Toolset/TerrainToPNG")]
+    private static void Init()
     {
         TerrainToPNGEditor window = GetWindow<TerrainToPNGEditor>();
         window.titleContent = new GUIContent("TerrainToPNG");
         window.Show();
+    }
+
+    private void OnEnable() {
+        SceneView.duringSceneGui += OnSceneGUI;
+    }
+
+    private void OnDisable() {
+        SceneView.duringSceneGui -= OnSceneGUI;
+        DestroyImmediate(_previewTexture);
+    }
+
+    private void OnSceneGUI(SceneView sceneView) {
+        if (_terrain != null) {
+            Handles.color = new Color(0, 0.5f, 1);
+            Vector3 terrainSize = _terrain.terrainData.size;
+            Handles.DrawWireCube(
+                _terrain.transform.position + new Vector3(terrainSize.x / 2, (_inputRange.y + _inputRange.x) / 2, terrainSize.z / 2)
+                , new Vector3(terrainSize.x, _inputRange.y - _inputRange.x, terrainSize.z));
+        }
     }
 
     void OnGUI()
@@ -36,14 +55,6 @@ public class TerrainToPNGEditor : EditorWindow
             UpdatePreviewTexture(ConvertToTexture());
         }
 
-        using (new EditorGUI.DisabledScope(_previewTexture == null))
-        {
-            if (GUILayout.Button("Save As PNG"))
-            {
-                SaveAsPNG(_previewTexture);
-            }
-        }
-
         GUILayout.Space(10);
 
         // Display preview texture
@@ -51,6 +62,14 @@ public class TerrainToPNGEditor : EditorWindow
         {
             GUILayout.Label("Preview:");
             GUILayout.Label(_previewTexture, GUILayout.MaxHeight(200), GUILayout.MaxWidth(200));
+        }
+
+        using (new EditorGUI.DisabledScope(_previewTexture == null))
+        {
+            if (GUILayout.Button("Save As PNG"))
+            {
+                SaveAsPNG(_previewTexture);
+            }
         }
     }
 
