@@ -1,0 +1,8 @@
+{
+  "name": "com.fullmetalbagel.editor-tools",
+  "dependencies": {
+  },
+  "version": "0.0.1",
+  "unity": "2021.3",
+  "displayName": "Editor Tools"
+}
