@@ -86,7 +86,12 @@ public class TerrainToPNGEditor : EditorWindow
             texture.SetPixels(colors);
             texture.Apply();
 
-            return texture;
+            float aspectRatio = terrainData.heightmapScale.x / terrainData.heightmapScale.z;
+            (int newTextureWidth, int newTextureHeight) = aspectRatio >= 1 ? (texture.width, (int)(texture.width / aspectRatio)) : ((int)(texture.height * aspectRatio), texture.height);
+            Texture2D scaledTexture = CreateScaledTexture(texture, newTextureWidth, newTextureHeight);
+            DestroyImmediate(texture);
+
+            return scaledTexture;
         }
         else
         {
@@ -107,6 +112,19 @@ public class TerrainToPNGEditor : EditorWindow
             // Clone the texture to avoid modifying the original texture
             _previewTexture = Instantiate(newTexture);
         }
+    }
+
+    private Texture2D CreateScaledTexture(Texture2D sourceTexture, int newWidth, int newHeight)
+    {
+        var rt = RenderTexture.GetTemporary(newWidth, newHeight, 0, RenderTextureFormat.ARGB32);
+        Graphics.Blit(sourceTexture, rt);
+        Texture2D scaledTexture = new Texture2D(newWidth, newHeight, TextureFormat.ARGB32, false);
+        RenderTexture.active = rt;
+        scaledTexture.ReadPixels(new Rect(0, 0, newWidth, newHeight), 0, 0);
+        scaledTexture.Apply();
+        RenderTexture.active = null;
+        RenderTexture.ReleaseTemporary(rt);
+        return scaledTexture;
     }
 
     private void SaveAsPNG(Texture2D texture)
