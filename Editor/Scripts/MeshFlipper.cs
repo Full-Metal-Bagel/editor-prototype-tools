@@ -8,18 +8,29 @@ public class MeshFlipper : EditorWindow
     [MenuItem("Tools/FMB Toolset/Flip Mesh Upside Down")]
     private static void FlipSelectedMeshUpsideDown()
     {
-        string path = EditorUtility.OpenFilePanel("Select Mesh to Flip", "Assets/", "fbx,asset");
+        string path = EditorUtility.OpenFilePanel("Select Mesh to Flip", "Assets/", "fbx,asset,mesh,prefab");
+        if (path.StartsWith(Application.dataPath)) path = "Assets" + path.Substring(Application.dataPath.Length);
         if (string.IsNullOrEmpty(path))
             return;
 
+        Mesh originalMesh;
+
         GameObject selectedObject = AssetDatabase.LoadAssetAtPath<GameObject>(path);
 
-        if (selectedObject == null || selectedObject.GetComponent<MeshFilter>() == null) {
-            Debug.LogError("Please select a GameObject with a MeshFilter component.");
-            return;
+        if (selectedObject != null)
+        {
+            if (selectedObject.GetComponent<MeshFilter>() == null) {
+                Debug.LogError("Please select a GameObject with a MeshFilter component.");
+                return;
+            }
+
+            originalMesh = selectedObject.GetComponent<MeshFilter>().sharedMesh;
+        }
+        else
+        {
+            originalMesh = AssetDatabase.LoadAssetAtPath<Mesh>(path);
         }
 
-        Mesh originalMesh = selectedObject.GetComponent<MeshFilter>().sharedMesh;
 
         if (originalMesh == null) {
             Debug.LogError("Selected GameObject does not have a valid mesh.");
@@ -30,6 +41,10 @@ public class MeshFlipper : EditorWindow
 
         string savePath = EditorUtility.SaveFilePanel("Save Flipped Mesh", "Assets/", "FlippedMesh", "asset");
 
+        if (savePath.StartsWith(Application.dataPath))
+        {
+            savePath = "Assets" + savePath.Substring(Application.dataPath.Length);
+        }
         if (!string.IsNullOrEmpty(savePath))
         {
             AssetDatabase.CreateAsset(flippedMesh, savePath);

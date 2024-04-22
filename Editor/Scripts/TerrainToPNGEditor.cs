@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEditor;
 
 public class TerrainToPNGEditor : EditorWindow
@@ -9,9 +10,20 @@ public class TerrainToPNGEditor : EditorWindow
     private Gradient _outputGradient = new Gradient();
     [SerializeField]
     private Vector2 _inputRange;
-
     [SerializeField]
     private Texture2D _previewTexture;
+
+    [Serializable]
+    private struct AdditionalMeshRender
+    {
+        public GameObject gameObject;
+        public Color renderColor;
+    }
+
+    [SerializeField]
+    private AdditionalMeshRender[] _additionalMeshRenders;
+
+    private SerializedObject _serializedObject;
 
     [MenuItem("Tools/FMB Toolset/Terrain To PNG")]
     private static void Init()
@@ -21,13 +33,19 @@ public class TerrainToPNGEditor : EditorWindow
         window.Show();
     }
 
-    private void OnEnable() {
+    private void OnEnable()
+    {
+        _serializedObject = new SerializedObject(this);
         SceneView.duringSceneGui += OnSceneGUI;
     }
 
     private void OnDisable() {
         SceneView.duringSceneGui -= OnSceneGUI;
+
+        // clean up
         DestroyImmediate(_previewTexture);
+        _serializedObject.Dispose();
+        _serializedObject = null;
     }
 
     private void OnSceneGUI(SceneView sceneView) {
